@@ -1,0 +1,120 @@
+#!/bin/bash
+# RGB LED Control Menu - With Background Services
+
+show_menu() {
+    clear
+    echo "================================="
+    echo "     🌈 RGB LED CONTROL 🌈      "
+    echo "================================="
+    echo ""
+    echo "EFFECTS:"
+    echo "1) Gentle Color Shift"
+    echo "2) CPU/Memory Monitor" 
+    echo "3) Low Voltage Warning"
+    echo ""
+    echo "BACKGROUND SERVICES:"
+    echo "4) Start Gentle Shift (Background)"
+    echo "5) Start CPU Monitor (Background)"
+    echo "6) Start Voltage Warning (Background)"
+    echo "7) Stop All Background Services"
+    echo "8) Show Running Services"
+    echo ""
+    echo "9) Exit"
+    echo ""
+    echo -n "Choose option (1-9): "
+}
+
+start_background() {
+    local script="$1"
+    local name="$2"
+    
+    # Check if already running
+    if pgrep -f "$script" > /dev/null; then
+        echo "$name is already running in background!"
+        return 1
+    fi
+    
+    # Start in background with nohup
+    nohup python3 "$script" > /dev/null 2>&1 &
+    echo "$name started in background (PID: $!)"
+    echo "Service will continue after terminal closes."
+}
+
+stop_all_services() {
+    echo "Stopping all RGB services..."
+    pkill -f "gentle_color_shift.py"
+    pkill -f "cpu_memory_monitor.py" 
+    pkill -f "low_voltage_warning.py"
+    echo "All RGB services stopped."
+}
+
+show_services() {
+    echo "=== RUNNING RGB SERVICES ==="
+    
+    if pgrep -f "gentle_color_shift.py" > /dev/null; then
+        echo "✅ Gentle Color Shift (PID: $(pgrep -f gentle_color_shift.py))"
+    else
+        echo "❌ Gentle Color Shift (not running)"
+    fi
+    
+    if pgrep -f "cpu_memory_monitor.py" > /dev/null; then
+        echo "✅ CPU/Memory Monitor (PID: $(pgrep -f cpu_memory_monitor.py))"
+    else
+        echo "❌ CPU/Memory Monitor (not running)"
+    fi
+    
+    if pgrep -f "low_voltage_warning.py" > /dev/null; then
+        echo "✅ Low Voltage Warning (PID: $(pgrep -f low_voltage_warning.py))"
+    else
+        echo "❌ Low Voltage Warning (not running)"
+    fi
+    echo ""
+}
+
+while true; do
+    show_menu
+    read -r choice
+    
+    case $choice in
+        1)
+            echo "Starting Gentle Color Shift (foreground)..."
+            python3 gentle_color_shift.py
+            ;;
+        2)
+            echo "Starting CPU/Memory Monitor (foreground)..."
+            python3 cpu_memory_monitor.py
+            ;;
+        3)
+            echo "Starting Low Voltage Warning (foreground)..."
+            python3 low_voltage_warning.py
+            ;;
+        4)
+            start_background "gentle_color_shift.py" "Gentle Color Shift"
+            read -p "Press ENTER to continue..."
+            ;;
+        5)
+            start_background "cpu_memory_monitor.py" "CPU/Memory Monitor"
+            read -p "Press ENTER to continue..."
+            ;;
+        6)
+            start_background "low_voltage_warning.py" "Low Voltage Warning"
+            read -p "Press ENTER to continue..."
+            ;;
+        7)
+            stop_all_services
+            read -p "Press ENTER to continue..."
+            ;;
+        8)
+            show_services
+            read -p "Press ENTER to continue..."
+            ;;
+        9)
+            echo "Exiting RGB Control..."
+            exit 0
+            ;;
+        *)
+            echo "Invalid choice! Please select 1-9."
+            read -p "Press ENTER to continue..."
+            ;;
+    esac
+done
