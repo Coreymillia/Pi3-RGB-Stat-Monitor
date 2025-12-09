@@ -26,7 +26,9 @@ Blue  pin  →  GPIO 22 (Pin 15)
 Ground     →  Any GND pin
 ```
 
-**Important:** Use 220-330Ω resistors on each color line!
+**Important:** Use 220Ω resistors on each color line!  If you don't have anything  else, or do not want them as bright.
+You can use   100-220Ω on the green  and blue 
+Or 150-220Ω on the Red
 
 ## Installation 🚀
 
